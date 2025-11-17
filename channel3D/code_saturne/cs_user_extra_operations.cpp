@@ -31,7 +31,7 @@ static cs_time_plot_t *_pillar_force_plot = NULL;
 /*---------------------------------------------------------------------------*/
 
 static const double rho_ref = 1.0; /* density [kg/m3] */
-static const double U_ref = 1.0; /* reference velocity [m/s] (Re=100) */
+static const double U_ref = 1.0; /* reference velocity [m/s] (Re = 100) */
 static const double D_ref = 1.0; /* characteristic length: pillar height in y [m] */
 static const double L_ref = 0.41; /* spanwise thickness in z [m] */
 static const double A_ref = D_ref * L_ref; /* reference area [m2] */
@@ -70,16 +70,18 @@ cs_user_extra_operations(cs_domain_t  *domain)
     labels[4] = "Cl";
     labels[5] = "dp";
 
-    _pillar_force_plot = cs_time_plot_init_probe("pillar_forces",
-                                                 "",
-                                                 plot_format,
-                                                 use_iteration,
-                                                 plot_flush_wtime,
-                                                 plot_buffer_steps,
-                                                 n_variables,
-                                                 NULL,
-                                                 NULL,
-                                                 labels);
+    _pillar_force_plot = cs_time_plot_init_probe(
+        "pillar_forces",
+        "",
+        plot_format,
+        use_iteration,
+        plot_flush_wtime,
+        plot_buffer_steps,
+        n_variables,
+        NULL,
+        NULL,
+        labels
+    );
     BFT_FREE(labels);
   }
 
@@ -100,7 +102,7 @@ cs_user_extra_operations(cs_domain_t  *domain)
     const cs_real_t *b_face_surf =
       domain->mesh_quantities->b_face_surf;
 
-    /* 四角柱側面: Gmsh で付けた Physical Surface("pillar_walls") */
+    /* Physical Surface("pillar_walls") in .geo file */
     const cs_zone_t *zw = cs_boundary_zone_by_name("pillar_walls");
 
     if (zw != NULL) {
@@ -120,8 +122,8 @@ cs_user_extra_operations(cs_domain_t  *domain)
   }
 
   /*--------------------------------------------------------------------*/
-  /* 3) Compute drag and lift coefficients                              */
-  /*    x方向: 抗力, y方向: 揚力                                       */
+  /* 3) Compute drag and lift coefficients */
+  /*    x-direction: drag, y-direction: lift */
   /*--------------------------------------------------------------------*/
 
   double Cd = 0.0;
@@ -139,7 +141,6 @@ cs_user_extra_operations(cs_domain_t  *domain)
   /*--------------------------------------------------------------------*/
   /* 4) Approximate pressure loss between inlet and outlet               */
   /*    using normal component of boundary_stress                        */
-  /*    (traction ~ -p * n + viscous; viscous partは通常小さいと仮定)   */
   /*--------------------------------------------------------------------*/
 
   double dp = 0.0;
@@ -155,7 +156,6 @@ cs_user_extra_operations(cs_domain_t  *domain)
     const cs_real_3_t *b_face_normal =
       (const cs_real_3_t *)(domain->mesh_quantities->b_face_normal);
 
-    /* inlet / outlet それぞれで <t·n̂> を面積平均する */
     double sum_tn_area_in  = 0.0, sum_area_in  = 0.0;
     double sum_tn_area_out = 0.0, sum_area_out = 0.0;
 
@@ -171,13 +171,17 @@ cs_user_extra_operations(cs_domain_t  *domain)
         if (area <= 0.0)
           continue;
 
-        cs_real_3_t t = {bpro_forces[face_id][0],
-                         bpro_forces[face_id][1],
-                         bpro_forces[face_id][2]};
+        cs_real_3_t t = {
+            bpro_forces[face_id][0],
+            bpro_forces[face_id][1],
+            bpro_forces[face_id][2]
+        };
 
-        cs_real_3_t n = {b_face_normal[face_id][0],
-                         b_face_normal[face_id][1],
-                         b_face_normal[face_id][2]};
+        cs_real_3_t n = {
+            b_face_normal[face_id][0],
+            b_face_normal[face_id][1],
+            b_face_normal[face_id][2]
+        };
 
         const double nx = n[0] / area;
         const double ny = n[1] / area;
@@ -199,13 +203,17 @@ cs_user_extra_operations(cs_domain_t  *domain)
         if (area <= 0.0)
           continue;
 
-        cs_real_3_t t = {bpro_forces[face_id][0],
-                         bpro_forces[face_id][1],
-                         bpro_forces[face_id][2]};
+        cs_real_3_t t = {
+            bpro_forces[face_id][0],
+            bpro_forces[face_id][1],
+            bpro_forces[face_id][2]
+        };
 
-        cs_real_3_t n = {b_face_normal[face_id][0],
-                         b_face_normal[face_id][1],
-                         b_face_normal[face_id][2]};
+        cs_real_3_t n = {
+            b_face_normal[face_id][0],
+            b_face_normal[face_id][1],
+            b_face_normal[face_id][2]
+        };
 
         const double nx = n[0] / area;
         const double ny = n[1] / area;
@@ -218,7 +226,6 @@ cs_user_extra_operations(cs_domain_t  *domain)
       }
     }
 
-    /* 並列和 */
     cs_parall_sum(1, CS_REAL_TYPE, &sum_tn_area_in);
     cs_parall_sum(1, CS_REAL_TYPE, &sum_area_in);
     cs_parall_sum(1, CS_REAL_TYPE, &sum_tn_area_out);
@@ -233,10 +240,6 @@ cs_user_extra_operations(cs_domain_t  *domain)
     if (sum_area_out > 0.0)
       t_n_out = sum_tn_area_out / sum_area_out;
 
-    /* traction_n ≈ -p とみなし:
-     *   p ≈ -t_n なので
-     *   Δp = p_in - p_out ≈ -(t_n_in) - (-(t_n_out)) = -(t_n_in - t_n_out)
-     */
     dp = -(t_n_in - t_n_out);
   }
 
@@ -248,18 +251,20 @@ cs_user_extra_operations(cs_domain_t  *domain)
 
     double vals[n_variables];
 
-    vals[0] = total_force[0];  /* Fx */
-    vals[1] = total_force[1];  /* Fy */
-    vals[2] = total_force[2];  /* Fz */
+    vals[0] = total_force[0]; /* Fx */
+    vals[1] = total_force[1]; /* Fy */
+    vals[2] = total_force[2]; /* Fz */
     vals[3] = Cd;
     vals[4] = Cl;
     vals[5] = dp;
 
-    cs_time_plot_vals_write(_pillar_force_plot,
-                            ts->nt_cur,
-                            ts->t_cur,
-                            n_variables,
-                            vals);
+    cs_time_plot_vals_write(
+        _pillar_force_plot,
+        ts->nt_cur,
+        ts->t_cur,
+        n_variables,
+        vals
+    );
   }
 }
 
