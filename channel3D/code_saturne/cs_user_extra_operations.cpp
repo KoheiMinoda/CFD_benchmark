@@ -30,23 +30,11 @@ static cs_time_plot_t *_pillar_force_plot = NULL;
 /* Reference values for coefficients                                         */
 /*---------------------------------------------------------------------------*/
 
-/* 今回の四角柱
- *  - x方向（流れ方向）: 1.0 m
- *  - y方向（鉛直）    : 1.0 m
- *  - z方向（厚み）    : 0.41 m
- *
- * 抗力・揚力の基準面積: 流れに直交する y-z 面
- *   A_ref = 1.0 (y) * 0.41 (z) = 0.41 [m^2]
- *
- * U_ref は Re の定義に使った代表速度を自分で合わせて下さい。
- * 例: U_ref = 入口断面平均速度 or 入口中心速度など。
- */
-
-static const double rho_ref = 1.0;    /* density [kg/m3] */
-static const double U_ref   = 1.0;    /* reference velocity [m/s] <-- 必要に応じて変更 */
-static const double D_ref   = 1.0;    /* characteristic length: pillar height in y [m] */
-static const double L_ref   = 0.41;   /* spanwise thickness in z [m] */
-static const double A_ref   = D_ref * L_ref; /* reference area [m2] */
+static const double rho_ref = 1.0; /* density [kg/m3] */
+static const double U_ref = 1.0; /* reference velocity [m/s] (Re=100) */
+static const double D_ref = 1.0; /* characteristic length: pillar height in y [m] */
+static const double L_ref = 0.41; /* spanwise thickness in z [m] */
+static const double A_ref = D_ref * L_ref; /* reference area [m2] */
 
 /*---------------------------------------------------------------------------*/
 /*!
@@ -67,10 +55,10 @@ cs_user_extra_operations(cs_domain_t  *domain)
 
   if (cs_glob_rank_id < 1 && _pillar_force_plot == NULL) {
 
-    int                    plot_buffer_steps = -1;       /* no limit */
-    double                 plot_flush_wtime  = 60.0;     /* flush every 60s */
-    cs_time_plot_format_t  plot_format      = CS_TIME_PLOT_CSV;
-    bool                   use_iteration    = (ts->is_local) ? true : false;
+    int plot_buffer_steps = -1; /* no limit */
+    double plot_flush_wtime = 60.0; /* flush every 60s */
+    cs_time_plot_format_t plot_format = CS_TIME_PLOT_CSV;
+    bool use_iteration = (ts->is_local) ? true : false;
 
     const char **labels;
     BFT_MALLOC(labels, n_variables, const char *);
