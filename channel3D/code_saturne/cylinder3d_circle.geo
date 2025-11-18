@@ -26,7 +26,7 @@ R  = Dp/2;
 // N_inlet = (1.0*N_walls - 1)*L/H + 1;
 // N_outlet = (N_walls - 1)*L/H + 1; 
 
-lc = 0.005;
+lc = 0.01;
 N_bord = 0;
 N_bas = 0;
 N_walls = 0;
@@ -85,7 +85,7 @@ Recombine Surface {1};
 
 // Extrude with thickness Ev
 layers[] = Extrude {0, 0, Ev} {
-    Surface{1}; Layers{1}; Recombine;
+    Surface{1}; Layers{20}; Recombine;
 };
 
 Physical Surface("inlet") = {33};
