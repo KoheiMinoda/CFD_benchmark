@@ -1,6 +1,5 @@
-// cylinder3d.geo
 // Schäfer & Turek (1996) 3D circular cylinder case (3D-Z)
-// gmsh cylinder3d.geo -3 -o cylinder3d.msh
+// gmsh cylinder3d_square.geo -3 -o cylinder3d.msh
 // gmsh cylinder3d.msh &
 
 // pillar
@@ -22,7 +21,7 @@ Ev = 0.41;
 // N_inlet = (1.0*N_walls - 1)*L/H + 1;
 // N_outlet = (N_walls - 1)*L/H + 1; 
 
-lc = 0.01;
+lc = 0.005;
 N_bord = 0;
 N_bas = 0;
 N_walls = 0;
