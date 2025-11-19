@@ -1,5 +1,4 @@
-// wavesurface.geo
-// gmsh wavesurface.geo -3 -o wavesurface.msh
+// gmsh wavesurface_piston.geo -3 -o wavesurface.msh
 // gmsh wavesurface.msh &
 
 // ---------- Parameters ----------
