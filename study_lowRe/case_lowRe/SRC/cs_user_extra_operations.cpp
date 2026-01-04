@@ -86,46 +86,35 @@ cs_user_extra_operations(cs_domain_t *domain)
         
         double area = b_face_surf[face_id];
         
-        // 1. Get Stress Vector (Force per Unit Area)
-        double sigma[3];
-        sigma[0] = b_stress_val[face_id][0];
-        sigma[1] = b_stress_val[face_id][1];
-        sigma[2] = b_stress_val[face_id][2];
+        double nx = b_face_normal[face_id][0] / area;
+        double ny = b_face_normal[face_id][1] / area;
+        double nz = b_face_normal[face_id][2] / area;
 
-        // 2. Get Unit Normal Vector
-        double nx = b_face_normal[face_id][0];
-        double ny = b_face_normal[face_id][1];
-        double nz = b_face_normal[face_id][2];
+        double fx_total = b_stress_val[face_id][0] * area;
+        double fy_total = b_stress_val[face_id][1] * area;
+        double fz_total = b_stress_val[face_id][2] * area;
 
-        // 3. Project Stress onto Normal (Normal Stress = Pressure component)
-        // Dot product: S . n
-        double sigma_n = sigma[0]*nx + sigma[1]*ny + sigma[2]*nz;
+        double f_normal_mag = fx_total*nx + fy_total*ny + fz_total*nz;
 
-        // Pressure Force Vector (Normal component * Area)
-        double f_p[3];
-        f_p[0] = sigma_n * nx * area;
-        f_p[1] = sigma_n * ny * area;
-        f_p[2] = sigma_n * nz * area;
+        double fx_p = f_normal_mag * nx;
+        double fy_p = f_normal_mag * ny;
+        double fz_p = f_normal_mag * nz;
 
-        // Total Force Vector (Stress * Area)
-        double f_t[3];
-        f_t[0] = sigma[0] * area;
-        f_t[1] = sigma[1] * area;
-        f_t[2] = sigma[2] * area;
+        double fx_v = fx_total - fx_p;
+        double fy_v = fy_total - fy_p;
+        double fz_v = fz_total - fz_p;
 
-        // Viscous Force Vector (Total - Pressure)
-        // This corresponds to the Tangential component
-        double f_v[3];
-        f_v[0] = f_t[0] - f_p[0];
-        f_v[1] = f_t[1] - f_p[1];
-        f_v[2] = f_t[2] - f_p[2];
+        force_total[0] += fx_total;
+        force_total[1] += fy_total;
+        force_total[2] += fz_total;
 
-        // Accumulate
-        for (int i = 0; i < 3; i++) {
-            force_total[i]    += f_t[i];
-            force_pressure[i] += f_p[i];
-            force_viscous[i]  += f_v[i];
-        }
+        force_pressure[0] += fx_p;
+        force_pressure[1] += fy_p;
+        force_pressure[2] += fz_p;
+
+        force_viscous[0] += fx_v;
+        force_viscous[1] += fy_v;
+        force_viscous[2] += fz_v;
       }
     }
 
