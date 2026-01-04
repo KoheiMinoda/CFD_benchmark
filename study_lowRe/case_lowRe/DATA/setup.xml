@@ -31,7 +31,7 @@
     <scalar_balances/>
     <time_averages/>
     <time_parameters>
-      <iterations>1000</iterations>
+      <maximum_time>100</maximum_time>
       <property name="courant_number" label="CourantNb"/>
       <property name="fourier_number" label="FourierNb"/>
       <time_passing>0</time_passing>
@@ -71,7 +71,18 @@
   </calculation_management>
   <lagrangian model="off"/>
   <numerical_parameters>
-    <velocity_pressure_algo choice="simplec"/>
+    <velocity_pressure_algo choice="simple">
+      <min_fluid_iter>10</min_fluid_iter>
+      <max_fluid_iter>1000</max_fluid_iter>
+    </velocity_pressure_algo>
+    <pressure_relaxation>0.5</pressure_relaxation>
+    <equation_parameters>
+      <variable name="velocity" label="Velocity" dimension="3">
+        <convective_scheme choice="upwind"/>
+        <relaxation_coefficient>0.6</relaxation_coefficient>
+        <rhs_reconstruction>1</rhs_reconstruction>
+      </variable>
+    </equation_parameters>
   </numerical_parameters>
   <physical_properties>
     <fluid_properties>
@@ -88,7 +99,7 @@
         <postprocessing_recording status="off"/>
       </property>
       <property name="molecular_viscosity" choice="constant" label="LamVisc">
-        <initial_value>0.025</initial_value>
+        <initial_value>0.1</initial_value>
         <listing_printing status="off"/>
         <postprocessing_recording status="off"/>
       </property>
