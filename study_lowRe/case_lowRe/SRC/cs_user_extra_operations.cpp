@@ -22,10 +22,10 @@ static cs_time_plot_t *_cylinder_drag_plot = NULL;
 /* -----------------------------------------------------------------------
  * Parameters
  * ----------------------------------------------------------------------- */
-static const double rho_ref   = 1.0;  // [kg/m^3]
-static const double U_ref     = 1.0;  // [m/s]
-static const double D_ref     = 1.0;  // [m] Cylinder Diameter
-static const double L_span    = 1.0;  // [m] Domain Thickness
+static const double rho_ref = 1.0; // [kg/m^3]
+static const double U_ref = 1.0; // [m/s]
+static const double D_ref = 1.0; // [m] Cylinder Diameter
+static const double L_span = 1.0; // [m] Domain Thickness
 
 /* -----------------------------------------------------------------------
  * Main function
@@ -62,13 +62,12 @@ cs_user_extra_operations(cs_domain_t *domain)
     );
   }
 
-  /* Retrieve Boundary Stress Field (Must be enabled in GUI) */
+  /* Retrieve Boundary Stress Field */
   cs_field_t *f_stress = cs_field_by_name_try("boundary_stress");
 
   if (f_stress != NULL) {
 
     /* Pointers to Geometry and Stress */
-    /* Note: Casting to handle C++ strict type checking */
     const cs_real_3_t *b_stress_val = (const cs_real_3_t *)(f_stress->val);
     const cs_real_t *b_face_surf    = domain->mesh_quantities->b_face_surf;
     const cs_real_3_t *b_face_normal = (const cs_real_3_t *)domain->mesh_quantities->b_face_normal;
