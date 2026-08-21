@@ -9,7 +9,7 @@ from scipy.interpolate import griddata
 # ============================================================
 # CONFIG
 # ============================================================
-CASE_FILE  = "../POSTS/RESULTS_FLUID_DOMAIN.case"   # POD用出力を指す
+CASE_FILE  = "../POSTS/RESULTS_FLUID_DOMAIN.case"
 OUTPUT_DIR = "./POD_FIGS"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
