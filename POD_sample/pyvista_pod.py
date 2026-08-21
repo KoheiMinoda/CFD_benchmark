@@ -20,7 +20,7 @@ SNAP_END   = None     # None なら最後まで
 SNAP_STRIDE = 1       # 間引き（1=全部）
 
 SLICE_NORMAL = (0, 0, 1)
-SLICE_ORIGIN = (0, 0, 0.0628)   # z = Lz/2 = pi*H/2 ≈ 0.0628（スパン中央で切る）
+SLICE_ORIGIN = (0, 0, 0.002)   # z = Lz/2 = pi*H/2 ≈ 0.0628（スパン中央で切る）
 
 N_MODES = 6           # 可視化する上位モード数
 
