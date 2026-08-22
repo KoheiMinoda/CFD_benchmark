@@ -12,8 +12,8 @@ CASE_FILE  = "../POSTS/RESULTS_FLUID_DOMAIN.case"
 OUTPUT_DIR = "./POD_FIGS"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-SNAP_START = 100
-SNAP_END   = None
+SNAP_START = 200
+SNAP_END   = 600 # None にすると最終スナップまで
 SNAP_STRIDE = 1
 
 SLICE_NORMAL = (0, 0, 1)
@@ -24,8 +24,8 @@ GRID_NX = 600
 GRID_NY = 400
 
 H = 0.04
-U0 = 0.535                       # 基準速度（無次元化用）
-CYL_REGION = (-0.5, 0.5, -0.5, 0.5)   # x/H 単位で柱を描く
+U0 = 0.535 # 基準速度（無次元化用）
+CYL_REGION = (-0.5, 0.5, -0.5, 0.5) # x/H 単位で柱を描く
 
 # 描画範囲（x/H, y/H 単位）
 XLIM_H = (-2, 15)
@@ -41,7 +41,7 @@ def draw_cylinder(ax):
                  facecolor="lightgray", zorder=5))
 
 # ============================================================
-# 1. スナップショット読み込み（u, v 両成分）
+# スナップショット読み込み（u, v 成分）
 # ============================================================
 reader = pv.get_reader(CASE_FILE)
 time_values = np.array(reader.time_values)
@@ -50,7 +50,7 @@ end = SNAP_END if SNAP_END is not None else len(time_values)
 snap_indices = list(range(SNAP_START, end, SNAP_STRIDE))
 M = len(snap_indices)
 
-# サンプリング間隔（時間係数のFFT用）
+# サンプリング間隔 時間係数のFFT用
 dt_snap = np.mean(np.diff(time_values[snap_indices]))
 print(f"{M} snapshots, dt_snap = {dt_snap:.4e} s")
 
@@ -67,11 +67,11 @@ def get_sliced_uv(idx):
     pts = np.array(sliced.points)
     return pts, np.array(sliced["u_vel"]), np.array(sliced["v_vel"])
 
-# 共通グリッド（x/H, y/H 単位で作る）
+# 共通グリッド x/H, y/H 単位で作る
 xi = np.linspace(XLIM_H[0]*H, XLIM_H[1]*H, GRID_NX)
 yi = np.linspace(YLIM_H[0]*H, YLIM_H[1]*H, GRID_NY)
 Xi, Yi = np.meshgrid(xi, yi)
-Xi_H, Yi_H = Xi/H, Yi/H          # 描画用の無次元座標
+Xi_H, Yi_H = Xi/H, Yi/H # 描画用の無次元座標
 
 def interp(pts, vals):
     return griddata((pts[:,0], pts[:,1]), vals, (Xi, Yi), method="linear")
@@ -89,7 +89,7 @@ for j, idx in enumerate(snap_indices):
 X = np.nan_to_num(X, nan=0.0)
 
 # ============================================================
-# 2. 平均場と変動場
+# 平均場と変動場
 # ============================================================
 X_mean = X.mean(axis=1, keepdims=True)
 Xp = X - X_mean
@@ -98,7 +98,7 @@ u_mean = X_mean[:Ngrid, 0].reshape(GRID_NY, GRID_NX)
 v_mean = X_mean[Ngrid:2*Ngrid, 0].reshape(GRID_NY, GRID_NX)
 
 # ============================================================
-# 3. Snapshot POD
+# Snapshot POD
 # ============================================================
 C = Xp.T @ Xp
 lam, Psi = np.linalg.eigh(C)
@@ -130,7 +130,7 @@ print("Mode energy (%):", np.round(energy[:N_MODES]*100, 2))
 print("Mode St:", np.round(St_modes, 3))
 
 # ============================================================
-# 4. 描画：平均場 + 各モードの φx, φy を2列で
+# 描画：平均場 + 各モードの φx, φy を2列で
 # ============================================================
 fig, axes = plt.subplots(N_MODES+1, 2, figsize=(14, 3.2*(N_MODES+1)))
 fig.suptitle(r"POD modes of $U$  (normalised: $\langle\phi_i,\phi_i\rangle=1$)",
@@ -152,7 +152,7 @@ def plot_field(ax, field, title, clim, cmap="RdBu_r", center0=True):
     ax.set_title(title, fontsize=10)
     plt.colorbar(cf, ax=ax, fraction=0.025, pad=0.01)
 
-# 平均場（u/U0, v/U0）
+# 平均場 (u/U0, v/U0)
 plot_field(axes[0,0], u_mean/U0, r"time mean  $\bar{u}/U_0$",
            clim=(-0.2, 1.6), cmap="jet", center0=False)
 plot_field(axes[0,1], v_mean/U0, r"time mean  $\bar{v}/U_0$", clim=0.8)
@@ -161,7 +161,7 @@ plot_field(axes[0,1], v_mean/U0, r"time mean  $\bar{v}/U_0$", clim=0.8)
 for k in range(N_MODES):
     phi_u = Phi[:Ngrid, k].reshape(GRID_NY, GRID_NX)
     phi_v = Phi[Ngrid:2*Ngrid, k].reshape(GRID_NY, GRID_NX)
-    # 見やすさのため共通スケールで正規化
+    
     amax = max(np.nanmax(np.abs(phi_u)), np.nanmax(np.abs(phi_v)))
     scale = amax if amax > 0 else 1.0
     ttl = (rf"mode {k+1}  $\phi_x$   "
