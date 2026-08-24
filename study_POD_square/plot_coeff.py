@@ -5,7 +5,7 @@ import os
 # ============================================================
 # CONFIG
 # ============================================================
-CSV_FILE   = "./force_trackingforce_tracking.csv"   # 出力先に合わせて変更
+CSV_FILE   = "./force_trackingforce_tracking.csv"
 OUTPUT_DIR = "./FORCE_FIGS"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -22,7 +22,7 @@ data = np.loadtxt(CSV_FILE, delimiter=",", skiprows=1)
 # 空白/タブ区切りなら: data = np.loadtxt(CSV_FILE, skiprows=1)
 
 t_all = data[:, 0]
-keep  = t_all >= T_CUT          # 10秒以降だけ残す
+keep  = t_all >= T_CUT
 data  = data[keep]
 
 t   = data[:, 0]
